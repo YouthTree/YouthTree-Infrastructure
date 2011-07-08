@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+# A simple script to automate the process of running batches of backups on a given application host.
+# This makes it simple to get collated output of the results of running a series of emails versus one
+# for each trigger in the backup gem.
+
+# How can we perform backups?
+BACKUP_COMMAND = (ENV['YT_BACKUP_COMMAND'] || '/usr/local/bin/yt_backup')
+RAILS_ENV      = (ENV['YT_BACKUP_RAILS_ENV'] || 'production')
+# What actual backups should we run?
+DB_APPS       = %w(bighelpmob errbit wiki teambox site recruitment_platform mortimer)
+FILE_APPS     = %w(wiki teambox site)
+ALL_APPS      = DB_APPS | FILE_APPS 
+OTHER_BACKUPS = %w(server-configuration)
+
+PASSED_BACKUPS = []
+FAILED_BACKUPS = []
+
+def print_seperator
+  puts "=" * 50
+end
+
+def run_backup!(backup_name)
+  puts "Preparing to run backup: #{backup_name}"
+  print_seperator
+  passed = system BACKUP_COMMAND, "--run", backup_name
+  print_seperator
+  if passed
+    PASSED_BACKUPS << backup_name
+  else
+    FAILED_BACKUPS << backup_name
+  end
+end
+
+puts "Running YouthTree backups in #{RAILS_ENV}"
+print_seperator
+puts "This will run backups for the following apps:"
+puts ALL_APPS.join(', ')
+puts "As well as running the following other triggers:"
+puts OTHER_BACKUPS.join(', ')
+print_seperator
+
+puts ""
+
+ALL_APPS.each do |application_name|
+  puts ""
+  puts ""
+  print_seperator
+  puts "Running backups for application: #{application_name}"
+  print_seperator
+  puts ""
+  run_backup! "#{application_name}-#{RAILS_ENV}-db"       if DB_APPS.include?(application_name)
+  run_backup! "#{application_name}-#{RAILS_ENV}-contents" if FILE_APPS.include?(application_name)
+end
+
+puts ""
+puts ""
+print_seperator
+puts "Now running other tasks."
+print_seperator
+puts ""
+OTHER_BACKUPS.each do |item|
+  run_backup! item
+end
+
+puts ""
+puts ""
+puts "All backups run - #{PASSED_BACKUPS.size} passed and #{FAILED_BACKUPS.size} failed."
+puts "Passed: #{PASSED_BACKUPS.join(", ")}"
+puts "Failed: #{FAILED_BACKUPS.join(", ")}"
+
+exit FAILED_BACKUPS.size
