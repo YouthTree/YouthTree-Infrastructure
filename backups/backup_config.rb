@@ -21,7 +21,7 @@ PG_DATABASES = {
   :wiki                 => "wiki_#{RAILS_ENV}",
   :teambox              => "teambox_#{RAILS_ENV}",
   :mortimer             => "mortimer_#{RAILS_ENV}",
-  :site                 => "yt_#{RAILS_ENV}",
+  :site                 => "site_#{RAILS_ENV}",
   :recruitment_platform => "recruitment_platform_#{RAILS_ENV}"
 }
 

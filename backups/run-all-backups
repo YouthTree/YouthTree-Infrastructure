@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/local/bin/ruby
 
 # A simple script to automate the process of running batches of backups on a given application host.
 # This makes it simple to get collated output of the results of running a series of emails versus one
